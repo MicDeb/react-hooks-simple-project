@@ -26,10 +26,14 @@ const Ingredients = () => {
     });
   };
 
-  const removeIngredientHandler = (id) => {
-    setIngredients((state) => {
-      return state.filter((elem) => elem.id !== id);
+  const removeIngredientHandler = (ingredientId) => {
+    fetch(`https://react-hooks-ingredint-list.firebaseio.com/ingredients/${ingredientId}.json`, {
+      method: 'DELETE',
+    }).then(() => {
+      setIngredients((state) => {
+        return state.filter((elem) => elem.id !== ingredientId);
       });
+    });
   };
 
   return (

@@ -1,17 +1,31 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useReducer } from 'react';
 
 import IngredientForm from './IngredientForm';
 import Search from './Search';
 import IngredientList from "./IngredientList";
 import ErrorModal from "../UI/ErrorModal";
 
+const ingredientReducer = (currentIngredients, action) => {
+  switch (action.type) {
+    case 'SET':
+      return action.ingredients;
+    case 'ADD':
+      return [...currentIngredients, action.ingredient]
+    case 'DELETE':
+      return currentIngredients.filter(ing => ing.id !== action.id)
+    default:
+      throw new Error('Should not get there!')
+  }
+}
+
 const Ingredients = () => {
-  const [ingredients, setIngredients] = useState([]);
+  const [ingredients, dispatch] = useReducer(ingredientReducer);
+  // const [ingredients, setIngredients] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
 
   const filteredIngredientsHandler = useCallback((filteredIngredients) => {
-    setIngredients(filteredIngredients);
+    dispatch({ type: 'SET', ingredients: filteredIngredients });
   }, [])
 
   const addIngredientHandler = (ingredient) => {
@@ -24,22 +38,17 @@ const Ingredients = () => {
       setIsLoading(false);
       return response.json()
     }).then((responseData) => {
-      setIngredients((state) => [
-        ...state,
-        { id: responseData.name , ...ingredient }
-      ]);
+      dispatch({ type: 'ADD', ingredient: { id: responseData.name , ...ingredient } })
     });
   };
 
   const removeIngredientHandler = (ingredientId) => {
     setIsLoading(true);
-    fetch(`https://react-hooks-ingredint-list.firebaseio.com/ingredients/${ingredientId}.jsn`, {
+    fetch(`https://react-hooks-ingredint-list.firebaseio.com/ingredients/${ingredientId}.json`, {
       method: 'DELETE',
     }).then(() => {
       setIsLoading(false);
-      setIngredients((state) => {
-        return state.filter((elem) => elem.id !== ingredientId);
-      });
+      dispatch({ type: 'DELETE', id: ingredientId });
     }).catch(() => {
       setError('Something went wrong');
       setIsLoading(false);

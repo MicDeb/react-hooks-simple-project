@@ -8,6 +8,7 @@ const IngredientList = props => {
   const {
     onRemoveItem,
     isLoading,
+    ingredients,
   } = props;
 
   return (
@@ -19,7 +20,7 @@ const IngredientList = props => {
         )
         : (
           <ul>
-            {props.ingredients.map(ig => (
+            {ingredients.map(ig => (
               <li key={ig.id} onClick={onRemoveItem.bind(this, ig.id)}>
                 <span>{ig.title}</span>
                 <span>{ig.amount}x</span>
